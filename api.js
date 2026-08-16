@@ -7,6 +7,11 @@ const users = [
   { id: 3, name: 'Zeynep' }
 ];
 
+const MESSAGES = {
+  NAME_REQUIRED: 'Name is required and must be a non-empty string',
+  USER_NOT_FOUND: 'User not found'
+};
+
 const isValidName = (name) => {
   return typeof name === 'string' && name.trim() !== '';
 }
@@ -20,7 +25,7 @@ router.get('/user/:id', (req, res) => {
   const user = users.find(user => user.id === id);
 
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    return res.status(404).json({ message: MESSAGES.USER_NOT_FOUND });
   }
 
   res.json(user);
@@ -30,7 +35,7 @@ router.post('/user', (req, res) => {
   const { name } = req.body;
 
   if (!isValidName(name)) {
-    return res.status(400).json({ message: 'Name is required and must be a non-empty string' });
+    return res.status(400).json({ message: MESSAGES.NAME_REQUIRED });
   }
 
   const newUser = {
@@ -47,11 +52,11 @@ router.put('/user/:id', (req, res) => {
 
   const user = users.find(user => user.id === id);
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    return res.status(404).json({ message: MESSAGES.USER_NOT_FOUND });
   }
 
   if (!isValidName(name)) {
-    return res.status(400).json({ message: 'Name is required and must be a non-empty string' });
+    return res.status(400).json({ message: MESSAGES.NAME_REQUIRED });
   }
 
   user.name = name.trim();
@@ -62,7 +67,7 @@ router.delete('/user/:id', (req, res) => {
   const id = Number(req.params.id);
   const index = users.findIndex(user => user.id === id);
   if (index === -1) {
-    return res.status(404).json({ message: 'User not found' });
+    return res.status(404).json({ message: MESSAGES.USER_NOT_FOUND });
   }
   users.splice(index, 1);
   res.status(204).send();
