@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
+app.use(express.json());
+
 const users = [
   { id: 1, name: 'Ayşe' },
   { id: 2, name: 'Mehmet' },
@@ -19,12 +21,9 @@ app.get('/user/:id', (req, res) => {
   res.json(user);
 });
 
-app.use(express.json());
-
 app.post('/user', (req, res) => {
-
   const newUser = {
-    id: users.length + 1,
+    id: users.length ? Math.max(...users.map(u => u.id)) + 1 : 1,
     name: req.body.name
   };
   users.push(newUser);
@@ -43,12 +42,12 @@ app.put('/user/:id', (req, res) => {
 
 app.delete('/user/:id', (req, res) => {
   const id = Number(req.params.id);
-  const user = users.find(user => user.id === id);
-  if (!user) {
+  const index = users.findIndex(user => user.id === id);
+  if (index === -1) {
     return res.status(404).json({ message: 'User not found' });
   }
-  users = users.filter(user => user.id !== id);
-  res.json({ message: 'User deleted' });
+  users.splice(index, 1);
+  res.status(204).send();
 });
 
 app.listen(port, () => {
