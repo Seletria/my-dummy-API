@@ -8,6 +8,25 @@ Guidance for AI coding agents working in this repository.
 - Data storage: SQLite via `better-sqlite3`
 - Test infrastructure: not set up yet (see "Testing & Automation Roadmap")
 
+## API Endpoints
+
+Base URL: `http://localhost:3000` (see `index.js`). Routes are defined in `api.js` using Express Router.
+
+| Method | Endpoint      | Description | Success | Errors |
+|--------|---------------|-------------|---------|--------|
+| GET    | `/`           | Health check; returns API status and list of available endpoints | 200 | – |
+| GET    | `/user/:id`   | Returns a single user by numeric id | 200 | 404 if user not found |
+| POST   | `/user`       | Creates a user from `{ name }`; name must be a non-empty string | 201 + created user | 400 if name invalid |
+| PUT    | `/user/:id`   | Updates an existing user's name from `{ name }` | 200 + updated user | 404 if not found, 400 if name invalid |
+| DELETE | `/user/:id`   | Deletes a user by id | 204 (empty) | 404 if user not found |
+
+Implementation notes:
+
+- User data lives in an **in-memory array** seeded at module load (`users` in `api.js`); it resets when the server restarts. `better-sqlite3` is installed but not wired up yet.
+- New ids are generated as `max(existing ids) + 1`.
+- Name validation is centralized in `isValidName` (`typeof string && trim !== ''`).
+- Error messages come from the shared `MESSAGES` constant in `api.js`.
+
 ## Permissions
 
 ```yaml
