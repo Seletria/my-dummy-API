@@ -1,11 +1,13 @@
 const express = require('express');
-const apiRoutes = require('./api');
+const usersRoutes = require('./routes/users.routes');
+const healthCheck = require('./routes/healthCheck.routes');
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
-app.use('/', apiRoutes);
+app.use('/users', usersRoutes);
+app.use('/health-check', healthCheck);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });

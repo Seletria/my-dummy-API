@@ -9,7 +9,8 @@ const users = [
 
 const MESSAGES = {
   NAME_REQUIRED: 'Name is required and must be a non-empty string',
-  USER_NOT_FOUND: 'User not found'
+  USER_NOT_FOUND: 'User not found',
+  USERS_NOT_FOUND: 'Users not found',
 };
 
 const isValidName = (name) => {
@@ -17,10 +18,14 @@ const isValidName = (name) => {
 }
 
 router.get('/', (req, res) => {
-  res.json({ message: 'API is running', endpoints: ['/user/:id', '/user'] });
+  if (!users) {
+    return res.status(404).json({ message: MESSAGES.USERS_NOT_FOUND });
+  }
+
+  res.json(users);
 });
 
-router.get('/user/:id', (req, res) => {
+router.get('/:id', (req, res) => {
   const id = Number(req.params.id);
   const user = users.find(user => user.id === id);
 
@@ -31,7 +36,7 @@ router.get('/user/:id', (req, res) => {
   res.json(user);
 });
 
-router.post('/user', (req, res) => {
+router.post('/', (req, res) => {
   const { name } = req.body;
 
   if (!isValidName(name)) {
@@ -46,7 +51,7 @@ router.post('/user', (req, res) => {
   res.status(201).json(newUser);
 });
 
-router.put('/user/:id', (req, res) => {
+router.put('/:id', (req, res) => {
   const id = Number(req.params.id);
   const { name } = req.body;
 
@@ -63,7 +68,7 @@ router.put('/user/:id', (req, res) => {
   res.json(user);
 });
 
-router.delete('/user/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
   const id = Number(req.params.id);
   const index = users.findIndex(user => user.id === id);
   if (index === -1) {
