@@ -4,34 +4,38 @@ Guidance for AI coding agents working in this repository.
 
 ## Project Overview
 
-- REST API built with Express (entry point: `index.js`, routes: `api.js`)
-- Data storage: SQLite via `better-sqlite3`
-- Test infrastructure: not set up yet (see "Testing & Automation Roadmap")
+* REST API built with Express (entry point: `index.js`, routes: `api.js`)
+* Data storage: SQLite via `better-sqlite3`
+* Test infrastructure: not set up yet
+* API testing framework: Playwright
 
 ## API Endpoints
 
 Base URL: `http://localhost:3000` (see `index.js`). Routes are defined in `api.js` using Express Router.
 
-| Method | Endpoint      | Description | Success | Errors |
-|--------|---------------|-------------|---------|--------|
-| GET    | `/`           | Health check; returns API status and list of available endpoints | 200 | – |
-| GET    | `/user/:id`   | Returns a single user by numeric id | 200 | 404 if user not found |
-| POST   | `/user`       | Creates a user from `{ name }`; name must be a non-empty string | 201 + created user | 400 if name invalid |
-| PUT    | `/user/:id`   | Updates an existing user's name from `{ name }` | 200 + updated user | 404 if not found, 400 if name invalid |
-| DELETE | `/user/:id`   | Deletes a user by id | 204 (empty) | 404 if user not found |
+| Method | Endpoint    | Description                                                      | Success            | Errors                                |
+| ------ | ----------- | ---------------------------------------------------------------- | ------------------ | ------------------------------------- |
+| GET    | `/`         | Health check; returns API status and list of available endpoints | 200                | –                                     |
+| GET    | `/user/:id` | Returns a single user by numeric id                              | 200                | 404 if user not found                 |
+| POST   | `/user`     | Creates a user from `{ name }`; name must be a non-empty string  | 201 + created user | 400 if name invalid                   |
+| PUT    | `/user/:id` | Updates an existing user's name from `{ name }`                  | 200 + updated user | 404 if not found, 400 if name invalid |
+| DELETE | `/user/:id` | Deletes a user by id                                             | 204 (empty)        | 404 if user not found                 |
 
-Implementation notes:
+### Implementation Notes
 
-- User data lives in an **in-memory array** seeded at module load (`users` in `api.js`); it resets when the server restarts. `better-sqlite3` is installed but not wired up yet.
-- New ids are generated as `max(existing ids) + 1`.
-- Name validation is centralized in `isValidName` (`typeof string && trim !== ''`).
-- Error messages come from the shared `MESSAGES` constant in `api.js`.
+* User data currently lives in an in-memory array seeded at module load (`users` in `api.js`).
+* The data resets when the server restarts.
+* `better-sqlite3` is installed but is not wired up yet.
+* New IDs are generated as `max(existing ids) + 1`.
+* Name validation is centralized in `isValidName` (`typeof string && trim !== ''`).
+* Error messages come from the shared `MESSAGES` constant in `api.js`.
 
 ## Permissions
 
 ```yaml
 permission:
   edit: ask
+
   bash:
     "npm install*": ask
     "npm i *": ask
@@ -45,26 +49,84 @@ permission:
 
 ## Core Behavior Rules
 
-1. **Ask first, act second.** Always proceed slowly, one step at a time. Explain what you intend to do and get approval BEFORE making changes. NEVER modify anything without asking the user first.
-2. **NEVER silently install a package.** Never run `npm install`, `npx playwright`, or any dependency-adding command without asking first and explaining why it is needed.
-3. **Git safety.** NEVER run `git commit` or `git push` without explicit user confirmation.
-4. **Test architecture decisions.** If POM (Page Object Model) vs custom helpers architecture is unclear for a given file, ASK the user before deciding.
-5. Keep every change minimal and strictly scoped to what was agreed upon. No drive-by refactors or unrequested extras.
+1. **Ask first, act second.**
+   Always proceed one step at a time. Explain what you intend to do and get approval BEFORE making changes.
+
+2. **Never silently install packages.**
+   Never run `npm install`, `npm i`, `npx playwright`, or any dependency-adding command without explicit user approval.
+
+3. **Git safety.**
+   NEVER run `git commit` or `git push` without explicit user confirmation.
+
+4. **Keep changes minimal.**
+   Do not perform drive-by refactors, formatting changes, renaming, or unrelated improvements.
+
+5. **Do not assume architectural decisions.**
+   If the appropriate test structure or abstraction is unclear, ASK the user before deciding.
+
+6. **Do not modify API implementation to make tests easier.**
+   Tests should adapt to the existing API unless the user explicitly requests API changes.
+
+7. **Test failures require approval before modifying tests.**
+   When a test fails, first investigate and explain the failure. Do not modify the test, assertions, expected values, or API implementation to make the test pass without explicit user approval.
+
+8. **Do not assume the expected behavior.**
+   When the actual API behavior differs from the test expectation, report the difference and ask the user whether the test expectation or the API implementation should be changed.
 
 ## API Development
 
 When helping develop the API:
 
-- Respect existing patterns in `index.js` and `api.js`; do not restructure without being asked.
-- Propose the endpoint/route design first, wait for approval, then implement.
-- Prefer small, incremental changes over large rewrites.
-- When a new dependency seems necessary, explain what it does and why, then wait for explicit approval before installing.
+* Respect existing patterns in `index.js` and `api.js`.
+* Do not restructure the API without explicit approval.
+* Propose endpoint/route design first and wait for approval before implementing.
+* Prefer small, incremental changes.
+* When a new dependency is required, explain what it does and why, then wait for explicit approval before installing it.
 
-## Testing & Automation Roadmap
+## Testing & Automation
 
-Planned work (to be done incrementally, always confirming each step with the user):
+### Framework
 
-1. Set up a test runner/framework (candidate: Playwright) — package installation requires prior approval per the rules above.
-2. Connect tests to the existing API endpoints.
-3. Automate the test runs (e.g., npm scripts / CI) once the suite is stable.
-4. Decide per-file architecture (POM vs custom commands): when unclear, ask the user before structuring test files.
+* Use **Playwright** for API testing.
+* Use Playwright's `APIRequestContext` for REST API requests.
+* Do NOT introduce browser-based UI tests unless explicitly requested.
+* Do NOT introduce another test framework unless explicitly requested.
+
+### Test Strategy
+
+* Start with endpoint-level API tests.
+* Validate HTTP status codes and response bodies.
+* Validate response headers when relevant.
+* Test both successful and unsuccessful scenarios.
+* Include validation and edge cases where appropriate.
+* Tests should verify externally observable API behavior, not implementation details.
+* Keep tests independent from the internal `users` array or other implementation details.
+
+### Test Architecture
+
+* Do not introduce Page Object Model for API tests unless explicitly requested.
+* Prefer simple test files initially.
+* Introduce fixtures, helpers, or shared abstractions only when there is clear duplication or a demonstrated need.
+* Do not create abstractions speculatively.
+
+### Testing Roadmap
+
+Work incrementally and confirm each step with the user:
+
+1. Set up Playwright for API testing.
+2. Verify the API can be started and reached by the tests.
+3. Create the first API test.
+4. Add positive test scenarios.
+5. Add negative and validation scenarios.
+6. Add edge cases where appropriate.
+7. Refactor test structure only if duplication or complexity requires it.
+8. Add npm test scripts once the test setup is stable.
+9. Add CI automation only after the local test suite is stable.
+
+## Working Style
+
+* Before making changes, explain what you plan to change and why.
+* Make one logical change at a time.
+* After each change, report what was changed and whether verification was performed.
+* If a command may modify files, install dependencies, or affect Git state, ask for approval when required by the permissions above.
+* If requirements are ambiguous, ask instead of guessing.
