@@ -3,7 +3,7 @@
 ## Business Rules
 
 ### Health Check
-- GET `/` returns API status and available endpoints
+- GET `/health-check` returns API status and available endpoints
 
 ### User Creation
 - New users are assigned a unique ID automatically

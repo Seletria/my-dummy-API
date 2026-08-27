@@ -10,7 +10,6 @@ const users = [
 const MESSAGES = {
   NAME_REQUIRED: 'Name is required and must be a non-empty string',
   USER_NOT_FOUND: 'User not found',
-  USERS_NOT_FOUND: 'Users not found',
 };
 
 const isValidName = (name) => {
@@ -18,10 +17,6 @@ const isValidName = (name) => {
 }
 
 router.get('/', (req, res) => {
-  if (!users) {
-    return res.status(404).json({ message: MESSAGES.USERS_NOT_FOUND });
-  }
-
   res.json(users);
 });
 

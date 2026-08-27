@@ -4,31 +4,31 @@ Guidance for AI coding agents working in this repository.
 
 ## Project Overview
 
-* REST API built with Express (entry point: `index.js`, routes: `api.js`)
+* REST API built with Express (entry point: `index.js`, routes: `routes/users.routes.js` + `routes/healthCheck.routes.js`)
 * Data storage: SQLite via `better-sqlite3`
 * Test infrastructure: not set up yet
 * API testing framework: Playwright
 
 ## API Endpoints
 
-Base URL: `http://localhost:3000` (see `index.js`). Routes are defined in `api.js` using Express Router.
+Base URL: `http://localhost:3000` (see `index.js`). Routes are defined in `routes/users.routes.js` and `routes/healthCheck.routes.js` using Express Router.
 
 | Method | Endpoint    | Description                                                      | Success            | Errors                                |
 | ------ | ----------- | ---------------------------------------------------------------- | ------------------ | ------------------------------------- |
-| GET    | `/`         | Health check; returns API status and list of available endpoints | 200                | –                                     |
-| GET    | `/user/:id` | Returns a single user by numeric id                              | 200                | 404 if user not found                 |
-| POST   | `/user`     | Creates a user from `{ name }`; name must be a non-empty string  | 201 + created user | 400 if name invalid                   |
-| PUT    | `/user/:id` | Updates an existing user's name from `{ name }`                  | 200 + updated user | 404 if not found, 400 if name invalid |
-| DELETE | `/user/:id` | Deletes a user by id                                             | 204 (empty)        | 404 if user not found                 |
+| GET    | `/health-check` | Health check; returns API status and list of available endpoints | 200                | –                                     |
+| GET    | `/users/:id` | Returns a single user by numeric id                              | 200                | 404 if user not found                 |
+| POST   | `/users`     | Creates a user from `{ name }`; name must be a non-empty string  | 201 + created user | 400 if name invalid                   |
+| PUT    | `/users/:id` | Updates an existing user's name from `{ name }`                  | 200 + updated user | 404 if not found, 400 if name invalid |
+| DELETE | `/users/:id` | Deletes a user by id                                             | 204 (empty)        | 404 if user not found                 |
 
 ### Implementation Notes
 
-* User data currently lives in an in-memory array seeded at module load (`users` in `api.js`).
+* User data currently lives in an in-memory array seeded at module load (`users` in `routes/users.routes.js`).
 * The data resets when the server restarts.
 * `better-sqlite3` is installed but is not wired up yet.
 * New IDs are generated as `max(existing ids) + 1`.
 * Name validation is centralized in `isValidName` (`typeof string && trim !== ''`).
-* Error messages come from the shared `MESSAGES` constant in `api.js`.
+* Error messages come from the shared `MESSAGES` constant in `routes/users.routes.js`.
 
 ## Permissions
 
@@ -77,7 +77,7 @@ permission:
 
 When helping develop the API:
 
-* Respect existing patterns in `index.js` and `api.js`.
+* Respect existing patterns in `index.js` and `routes/`.
 * Do not restructure the API without explicit approval.
 * Propose endpoint/route design first and wait for approval before implementing.
 * Prefer small, incremental changes.
