@@ -13,6 +13,16 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.parse.failed' || err instanceof SyntaxError) {
+    console.error('[JSON Parse Error]', err.message);
+    return res.status(400).json({ message: 'Invalid JSON payload' });
+  }
+
+  console.error('[Unhandled Error]', err.stack);
+  res.status(500).json({ message: 'Internal server error' });
+});
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
