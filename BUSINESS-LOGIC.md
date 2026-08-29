@@ -9,11 +9,15 @@
 - New users are assigned a unique ID automatically
 - Name is required and must be a non-empty string
 - Name is trimmed before saving
+- Role is optional; if provided it must be one of `admin` or `user` (400 if invalid)
+- If role is not provided, it defaults to `user`
 
 ### User Update
 - User must exist (404 if not found)
 - Name is required and must be a non-empty string
 - Name is trimmed before saving
+- Role is optional; if provided it must be one of `admin` or `user` (400 if invalid)
+- If role is not provided, the existing role is preserved (does not revert to default)
 - User not found (404) takes priority over name validation (400)
 
 ### User Deletion
@@ -23,6 +27,15 @@
 ### Name Validation
 - Must be a string
 - Must not be empty after trimming
+
+### Role Validation
+- Accepts only `admin` or `user`
+- Optional for both creation and update
+- Invalid values return 400
+- Default on creation (when omitted): `user`
+- On update (when omitted): existing role is preserved
+- Case-insensitive: `Admin`, `ADMIN`, `admin` are all accepted and normalized to `admin` before saving
+- Explicit `null` is treated as an invalid value, not as 'omitted' — sending `role: null` returns 400, it does not fall back to the default.
 
 ### Undefined Routes
 - Any request to an undefined route returns 404
@@ -59,6 +72,16 @@
 - Create user with leading/trailing spaces → Name is trimmed
 - GET non-existent user → 404
 - DELETE non-existent user → 404
+
+### Role Scenarios
+- Create user without role → role defaults to `user`
+- Create user with valid role (`admin`) → role saved as given
+- Create user with mixed-case role (`Admin`) → normalized and saved as `admin`
+- Create user with invalid role (`superadmin`) → 400, user not created
+- Create user with `role: null` → 400 (null is not treated as omitted)
+- Update user's role only (name unchanged) → role updated, name untouched
+- Update user without sending role → existing role is preserved (does not reset to default `user`)
+- GET /users → every user object includes a `role` field
 
 ### `:id` Parameter Edge Cases
 
