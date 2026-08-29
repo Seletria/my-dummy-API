@@ -94,6 +94,6 @@
 - `PATCH /users/:id` (or any unsupported method on an existing route) returns `404 Route not found` instead of the more semantically correct `405 Method Not Allowed`.
 - **Status:** Accepted limitation, not scheduled for fix.
 
-### Dead Code — `if (!users)` Check in GET `/users`
-- The check `if (!users)` in the users list route is unreachable, since `users` is always an array reference (never `null`/`undefined`). The intended check was likely `if (!users.length)`, but returning 404 for an empty collection would violate REST convention (an empty collection is a valid 200 response).
-- **Status:** Not fixed — flagged for awareness, current behavior (always falls through) is actually correct per REST convention.
+### Dead Code — `if (!users)` Check in GET `/users` (RESOLVED)
+- The check `if (!users)` in the users list route was unreachable, since `users` is always an array reference (never `null`/`undefined`). The intended check was likely `if (!users.length)`, but returning 404 for an empty collection would violate REST convention (an empty collection is a valid 200 response).
+- **Status:** ✅ Resolved — the `if (!users)` check was silently removed from `router.get('/', ...)` during the `routes/` refactor. The current behavior (always returns 200) is correct per REST convention.

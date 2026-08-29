@@ -5,7 +5,7 @@ Guidance for AI coding agents working in this repository.
 ## Project Overview
 
 * REST API built with Express (entry point: `index.js`, routes: `routes/users.routes.js` + `routes/healthCheck.routes.js`)
-* Data storage: SQLite via `better-sqlite3`
+* Data storage: in-memory array (see `routes/users.routes.js`)
 * Test infrastructure: not set up yet
 * API testing framework: Playwright
 
@@ -25,7 +25,6 @@ Base URL: `http://localhost:3000` (see `index.js`). Routes are defined in `route
 
 * User data currently lives in an in-memory array seeded at module load (`users` in `routes/users.routes.js`).
 * The data resets when the server restarts.
-* `better-sqlite3` is installed but is not wired up yet.
 * New IDs are generated as `max(existing ids) + 1`.
 * Name validation is centralized in `isValidName` (`typeof string && trim !== ''`).
 * Error messages come from the shared `MESSAGES` constant in `routes/users.routes.js`.
