@@ -104,6 +104,12 @@
 | 10 | DELETE success response headers | `DELETE /users/:id` | 204, no `Content-Type` header — correct per HTTP spec |
 | 11 | Content-Type mismatch, valid JSON body | `POST /users` with `Content-Type: text/plain` and body `{"name":"Test"}` | Body is **not parsed** (middleware only inspects the header, not content). `req.body` is empty/undefined → falls through to normal validation → 400 "Name is required", **not** a JSON parse error. Can be a confusing debugging trap for API consumers who set the wrong header. |
 
+### Routing / Method Semantics
+
+| # | Scenario | Request | Result |
+|---|---|---|---|
+| 12 | POST on a resource path | `POST /users/4` | 404 `Route not found` — POST is only defined on the collection root (`/users`), not on a specific resource; this is not equivalent to an update (see `PUT /users/:id` for updates) |
+
 ---
 
 ## Known Issues
