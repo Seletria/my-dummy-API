@@ -23,6 +23,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal server error' });
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`[Startup Error] Port ${port} is already in use.`);
+  } else {
+    console.error('[Startup Error]', err.message);
+  }
+  process.exit(1);
 });
