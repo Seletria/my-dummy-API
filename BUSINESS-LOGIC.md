@@ -11,6 +11,10 @@
 - Name is trimmed before saving
 - Role is optional; if provided it must be one of `admin` or `user` (400 if invalid)
 - If role is not provided, it defaults to `user`
+- `email` is required and must be a valid email format (400 if invalid)
+- `email` must be unique across all users (409 if already taken)
+- Users are created with `active: true` by default
+- `createdAt` is set automatically (ISO 8601 timestamp), immutable after creation
 
 ### User Update
 - User must exist (404 if not found)
@@ -19,6 +23,7 @@
 - Role is optional; if provided it must be one of `admin` or `user` (400 if invalid)
 - If role is not provided, the existing role is preserved (does not revert to default)
 - User not found (404) takes priority over name validation (400)
+- `updatedAt` is refreshed automatically (ISO 8601 timestamp) on every successful update
 
 ### User Deletion
 - User must exist (404 if not found)
@@ -29,13 +34,18 @@
 - Must not be empty after trimming
 
 ### Role Validation
-- Accepts only `admin` or `user`
+- Accepts `admin`, `user`, or `moderator`
 - Optional for both creation and update
 - Invalid values return 400
 - Default on creation (when omitted): `user`
 - On update (when omitted): existing role is preserved
 - Case-insensitive: `Admin`, `ADMIN`, `admin` are all accepted and normalized to `admin` before saving
 - Explicit `null` is treated as an invalid value, not as 'omitted' — sending `role: null` returns 400, it does not fall back to the default.
+
+### Email Validation
+- Must match standard email format (`local@domain.tld`)
+- Must be unique — checked case-insensitively
+- Required on creation; optional on update (existing email preserved if omitted)
 
 ### Undefined Routes
 - Any request to an undefined route returns 404
@@ -73,10 +83,19 @@
 - GET non-existent user → 404
 - DELETE non-existent user → 404
 
+### User Fields — Lifecycle
+- Create a user → response includes `active: true`, `createdAt` timestamp
+- List users → inactive users excluded from `GET /users`
+- Retrieve an inactive user by id → still returned via `GET /users/:id`
+- Update a user's name → `updatedAt` changes; `createdAt` stays the same
+- Create user with duplicate email → 409, user not created
+- Create user with malformed email (`"not-an-email"`) → 400, user not created
+
 ### Role Scenarios
 - Create user without role → role defaults to `user`
 - Create user with valid role (`admin`) → role saved as given
 - Create user with mixed-case role (`Admin`) → normalized and saved as `admin`
+- Create user with role `moderator` → role saved as given
 - Create user with invalid role (`superadmin`) → 400, user not created
 - Create user with `role: null` → 400 (null is not treated as omitted)
 - Update user's role only (name unchanged) → role updated, name untouched
