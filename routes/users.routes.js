@@ -27,7 +27,11 @@ const isValidName = (name) => {
 
 const isValidRole = (role) => {
   if (typeof role !== 'string') return false;
-  return VALID_ROLES.includes(role.toLowerCase());
+  return VALID_ROLES.includes(normalizeRole(role));
+};
+
+const normalizeRole = (role) => {
+  return role.toLowerCase();
 };
 
 router.get('/', (req, res) => {
@@ -68,7 +72,7 @@ router.post('/', (req, res) => {
     id: users.length ? Math.max(...users.map(u => u.id)) + 1 : 1,
     name: name.trim(),
     email,
-    role: role !== undefined ? role.toLowerCase() : 'user',
+    role: role !== undefined ? normalizeRole(role) : 'user',
     active: active !== undefined ? active : true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -106,7 +110,7 @@ router.put('/:id', (req, res) => {
 
   user.name = name.trim();
   if (role !== undefined) {
-    user.role = role.toLowerCase();
+    user.role = normalizeRole(role);
   }
   if (active !== undefined) {
     user.active = active;
