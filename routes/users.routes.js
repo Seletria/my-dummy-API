@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 
 const users = [
-  { id: 1, name: 'Ayşe', role: 'admin' },
-  { id: 2, name: 'Mehmet', role: 'user' },
-  { id: 3, name: 'Zeynep', role: 'user' }
+  { id: 1, name: 'Ayşe', role: 'admin', active: true },
+  { id: 2, name: 'Mehmet', role: 'user', active: true },
+  { id: 3, name: 'Zeynep', role: 'user', active: true }
 ];
 
 const MESSAGES = {
@@ -25,7 +25,7 @@ const isValidRole = (role) => {
 };
 
 router.get('/', (req, res) => {
-  res.json(users);
+  res.json(users.filter(user => user.active));
 });
 
 router.get('/:id', (req, res) => {
@@ -40,7 +40,7 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { name, role } = req.body;
+  const { name, role, active } = req.body;
 
   if (!isValidName(name)) {
     return res.status(400).json({ message: MESSAGES.NAME_REQUIRED });
@@ -53,7 +53,8 @@ router.post('/', (req, res) => {
   const newUser = {
     id: users.length ? Math.max(...users.map(u => u.id)) + 1 : 1,
     name: name.trim(),
-    role: role !== undefined ? role.toLowerCase() : 'user'
+    role: role !== undefined ? role.toLowerCase() : 'user',
+    active: active !== undefined ? active : true
   };
   users.push(newUser);
   res.status(201).json(newUser);
@@ -61,7 +62,7 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
   const id = Number(req.params.id);
-  const { name, role } = req.body;
+  const { name, role, active } = req.body;
 
   const user = users.find(user => user.id === id);
   if (!user) {
@@ -79,6 +80,9 @@ router.put('/:id', (req, res) => {
   user.name = name.trim();
   if (role !== undefined) {
     user.role = role.toLowerCase();
+  }
+  if (active !== undefined) {
+    user.active = active;
   }
   res.json(user);
 });
