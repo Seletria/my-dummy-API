@@ -11,6 +11,12 @@ const MESSAGES = {
   NAME_REQUIRED: 'Name is required and must be a non-empty string',
   USER_NOT_FOUND: 'User not found',
   INVALID_ROLE: 'Invalid role',
+  EMAIL_REQUIRED: 'Email is required and must be a valid email address',
+  EMAIL_TAKEN: 'Email is already taken',
+};
+
+const isValidEmail = (email) => {
+  return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
 const VALID_ROLES = ['admin', 'user'];
@@ -40,10 +46,18 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { name, role, active } = req.body;
+  const { name, role, active, email } = req.body;
 
   if (!isValidName(name)) {
     return res.status(400).json({ message: MESSAGES.NAME_REQUIRED });
+  }
+
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ message: MESSAGES.EMAIL_REQUIRED });
+  }
+
+  if (users.some(u => u.email && u.email.toLowerCase() === email.toLowerCase())) {
+    return res.status(409).json({ message: MESSAGES.EMAIL_TAKEN });
   }
 
   if (role !== undefined && !isValidRole(role)) {
@@ -53,6 +67,7 @@ router.post('/', (req, res) => {
   const newUser = {
     id: users.length ? Math.max(...users.map(u => u.id)) + 1 : 1,
     name: name.trim(),
+    email,
     role: role !== undefined ? role.toLowerCase() : 'user',
     active: active !== undefined ? active : true
   };
@@ -62,7 +77,7 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
   const id = Number(req.params.id);
-  const { name, role, active } = req.body;
+  const { name, role, active, email } = req.body;
 
   const user = users.find(user => user.id === id);
   if (!user) {
@@ -71,6 +86,16 @@ router.put('/:id', (req, res) => {
 
   if (!isValidName(name)) {
     return res.status(400).json({ message: MESSAGES.NAME_REQUIRED });
+  }
+
+  if (email !== undefined) {
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: MESSAGES.EMAIL_REQUIRED });
+    }
+    if (users.some(u => u.email && u.id !== user.id && u.email.toLowerCase() === email.toLowerCase())) {
+      return res.status(409).json({ message: MESSAGES.EMAIL_TAKEN });
+    }
+    user.email = email;
   }
 
   if (role !== undefined && !isValidRole(role)) {
