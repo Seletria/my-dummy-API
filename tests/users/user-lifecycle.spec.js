@@ -6,7 +6,8 @@ test.describe('User Lifecycle', () => {
     const createResponse = await request.post('/users', {
       data: {
         name: 'Lifecycle Create User',
-        role: 'admin'
+        role: 'admin',
+        email: 'lifecycle.create@example.com'
       }
     });
     expect(createResponse.status()).toBe(201);
@@ -24,7 +25,8 @@ test.describe('User Lifecycle', () => {
     const createResponse = await request.post('/users', {
       data: {
         name: 'Lifecycle Original Name',
-        role: 'user'
+        role: 'user',
+        email: 'lifecycle.original@example.com'
       }
     });
     const created = await createResponse.json();
@@ -49,7 +51,8 @@ test.describe('User Lifecycle', () => {
     const createResponse = await request.post('/users', {
       data: {
         name: 'Lifecycle Delete User',
-        role: 'user'
+        role: 'user',
+        email: 'lifecycle.delete@example.com'
       }
     });
     const created = await createResponse.json();
@@ -65,7 +68,8 @@ test.describe('User Lifecycle', () => {
     const createResponse = await request.post('/users', {
       data: {
         name: 'Lifecycle Double Delete User',
-        role: 'user'
+        role: 'user',
+        email: 'lifecycle.double.delete@example.com'
       }
     });
     const created = await createResponse.json();
