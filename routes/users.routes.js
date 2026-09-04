@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 
 const users = [
-  { id: 1, name: 'Ayşe', role: 'admin', active: true },
-  { id: 2, name: 'Mehmet', role: 'user', active: true },
-  { id: 3, name: 'Zeynep', role: 'user', active: true }
+  { id: 1, name: 'Ayşe', role: 'admin', active: true, createdAt: new Date('2026-01-01T00:00:00.000Z').toISOString(), updatedAt: new Date('2026-01-01T00:00:00.000Z').toISOString() },
+  { id: 2, name: 'Mehmet', role: 'user', active: true, createdAt: new Date('2026-01-01T00:00:00.000Z').toISOString(), updatedAt: new Date('2026-01-01T00:00:00.000Z').toISOString() },
+  { id: 3, name: 'Zeynep', role: 'user', active: true, createdAt: new Date('2026-01-01T00:00:00.000Z').toISOString(), updatedAt: new Date('2026-01-01T00:00:00.000Z').toISOString() }
 ];
 
 const MESSAGES = {
@@ -69,7 +69,9 @@ router.post('/', (req, res) => {
     name: name.trim(),
     email,
     role: role !== undefined ? role.toLowerCase() : 'user',
-    active: active !== undefined ? active : true
+    active: active !== undefined ? active : true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
   users.push(newUser);
   res.status(201).json(newUser);
@@ -109,6 +111,7 @@ router.put('/:id', (req, res) => {
   if (active !== undefined) {
     user.active = active;
   }
+  user.updatedAt = new Date().toISOString();
   res.json(user);
 });
 
