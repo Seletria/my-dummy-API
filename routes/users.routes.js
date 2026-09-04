@@ -19,7 +19,7 @@ const isValidEmail = (email) => {
   return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
-const VALID_ROLES = ['admin', 'user'];
+const VALID_ROLES = ['admin', 'user', 'moderator'];
 
 const isValidName = (name) => {
   return typeof name === 'string' && name.trim() !== '';
